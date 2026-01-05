@@ -10,3 +10,6 @@
 
 # Garder aussi le .gitignore lui-même
 !.gitignore
+
+# Garder le README
+!README.md
