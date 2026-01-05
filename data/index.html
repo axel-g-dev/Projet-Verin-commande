@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <title>ESP32 Serveur Web</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <img src="carnus.png" alt="Lycée Carnus Logo" class="logo">
+
+        <h1>Serveur Web embarqué V2.0</h1>
+        <h2>Page HTML + CSS + requêtes AJAX</h2>
+
+        <!-- AFFICHAGE MESURE -->
+        <h2>Position actuelle du vérin</h2>
+        <p>
+            <span class="label">Mesure :</span>
+            <span class="value" id="id_Distance_mesure">0</span> cm
+        </p>
+
+        <!-- COMMANDE CONSIGNE AVEC SLIDER -->
+        <h2>Commande du vérin</h2>
+
+        <div class="slider-container">
+            <p>
+                <span class="label">Consigne :</span>
+                <span class="value" id="consigne_affichee">26.0</span> cm
+            </p>
+            
+            <input type="range" id="consigne" min="60" max="360" value="260" step="1">
+            
+            <div class="slider-labels">
+                <span>0 cm</span>
+                <span>26 cm</span>
+                <span>30 cm</span>
+            </div>
+        </div>
+
+        <button onclick="envoyerConsigne()">Envoyer</button>
+
+        <div class="footer">
+            <p>© 2025 Lycée Carnus</p>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="script.js"></script>
+</body>
+</html>

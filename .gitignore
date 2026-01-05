@@ -1,0 +1,12 @@
+# Ignorer tout par défaut
+*
+
+# Mais garder les dossiers data et src
+!data/
+!data/**
+
+!src/
+!src/**
+
+# Garder aussi le .gitignore lui-même
+!.gitignore
