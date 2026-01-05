@@ -30,43 +30,43 @@ Ce projet implémente un système de contrôle de position pour vérin électriq
 
 ```mermaid
 graph TB
-    subgraph "ESP32"
-        MCU[Microcontrôleur ESP32]
-        WiFi[Module WiFi]
-        I2C[Bus I2C]
-        GPIO[GPIO PWM]
+    subgraph ESP32_Module["ESP32"]
+        MCU["Microcontrôleur<br/>ESP32"]
+        WiFi["Module<br/>WiFi"]
+        I2C["Bus<br/>I2C"]
+        GPIO["GPIO<br/>PWM"]
     end
     
-    subgraph "Capteur"
-        ADS[ADS1115<br/>ADC 16-bit]
-        Sensor[Capteur de position<br/>analogique]
+    subgraph Capteur_Module["Capteur"]
+        ADS["ADS1115<br/>ADC 16-bit"]
+        Sensor["Capteur de<br/>position analogique"]
     end
     
-    subgraph "Actionneur"
-        Driver[Driver L298N]
-        Motor[Moteur DC]
-        Actuator[Vérin électrique]
+    subgraph Actionneur_Module["Actionneur"]
+        Driver["Driver<br/>L298N"]
+        Motor["Moteur<br/>DC"]
+        Actuator["Vérin<br/>électrique"]
     end
     
-    subgraph "Interface"
-        Web[Navigateur Web]
+    subgraph Interface_Module["Interface"]
+        Web["Navigateur<br/>Web"]
     end
     
-    Sensor -->|Signal analogique| ADS
-    ADS -->|I2C 0x48| I2C
+    Sensor -->|"Signal<br/>analogique"| ADS
+    ADS -->|"I2C<br/>0x48"| I2C
     I2C --> MCU
     MCU --> GPIO
-    GPIO -->|PWM + Direction| Driver
-    Driver -->|Puissance| Motor
-    Motor -->|Mouvement| Actuator
-    Actuator -->|Position| Sensor
-    WiFi <-->|HTTP| Web
+    GPIO -->|"PWM +<br/>Direction"| Driver
+    Driver -->|"Puissance"| Motor
+    Motor -->|"Mouvement"| Actuator
+    Actuator -->|"Position"| Sensor
+    WiFi <-->|"HTTP"| Web
     WiFi --> MCU
     
-    style MCU fill:#4a90e2
-    style ADS fill:#50c878
-    style Driver fill:#ff6b6b
-    style Web fill:#ffd93d
+    style MCU fill:#4a90e2,stroke:#333,stroke-width:2px
+    style ADS fill:#50c878,stroke:#333,stroke-width:2px
+    style Driver fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style Web fill:#ffd93d,stroke:#333,stroke-width:2px
 ```
 
 ### Composants principaux
@@ -96,42 +96,42 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "Initialisation"
-        A[Démarrage] --> B[Configuration GPIO]
-        B --> C[Montage SPIFFS]
-        C --> D[Connexion WiFi]
-        D --> E[Démarrage serveur web]
-        E --> F[Initialisation ADS1115]
-        F --> G[Système prêt]
+    subgraph Init["Phase d'initialisation"]
+        A["Démarrage<br/>ESP32"] --> B["Configuration<br/>GPIO"]
+        B --> C["Montage<br/>SPIFFS"]
+        C --> D["Connexion<br/>WiFi"]
+        D --> E["Démarrage<br/>serveur web"]
+        E --> F["Initialisation<br/>ADS1115"]
+        F --> G["Système<br/>prêt"]
     end
     
-    subgraph "Boucle principale"
-        G --> H[Lecture ADC]
-        H --> I[Calcul position polynôme]
-        I --> J[Moyenne glissante]
-        J --> K[Calcul erreur]
-        K --> L{Erreur > trigger?}
-        L -->|Oui| M[Détermination sens]
-        L -->|Non| N[Arrêt moteur]
-        M --> O[Calcul PWM proportionnel]
-        O --> P[Application PWM]
+    subgraph Loop["Boucle principale"]
+        G --> H["Lecture<br/>ADC"]
+        H --> I["Calcul position<br/>polynôme"]
+        I --> J["Moyenne<br/>glissante"]
+        J --> K["Calcul<br/>erreur"]
+        K --> L{"Erreur<br/>supérieure<br/>au seuil?"}
+        L -->|"Oui"| M["Détermination<br/>sens"]
+        L -->|"Non"| N["Arrêt<br/>moteur"]
+        M --> O["Calcul PWM<br/>proportionnel"]
+        O --> P["Application<br/>PWM"]
         N --> P
-        P --> Q[Affichage série]
+        P --> Q["Affichage<br/>série"]
         Q --> H
     end
     
-    subgraph "Serveur Web"
-        R[Requête HTTP] --> S{Type?}
-        S -->|GET /| T[Envoi index.html]
-        S -->|GET /position| U[Envoi position actuelle]
-        S -->|POST /setConsigne| V[Validation limites]
-        V --> W[Mise à jour consigne]
+    subgraph WebServer["Serveur Web"]
+        R["Requête<br/>HTTP"] --> S{"Type de<br/>requête?"}
+        S -->|"GET /"| T["Envoi<br/>index.html"]
+        S -->|"GET /position"| U["Envoi position<br/>actuelle"]
+        S -->|"POST /setConsigne"| V["Validation<br/>limites"]
+        V --> W["Mise à jour<br/>consigne"]
     end
     
-    style A fill:#4a90e2
-    style G fill:#50c878
-    style H fill:#ffd93d
-    style R fill:#ff6b6b
+    style A fill:#4a90e2,stroke:#333,stroke-width:2px
+    style G fill:#50c878,stroke:#333,stroke-width:2px
+    style H fill:#ffd93d,stroke:#333,stroke-width:2px
+    style R fill:#ff6b6b,stroke:#333,stroke-width:2px
 ```
 
 ## Fonctionnement du code
@@ -196,41 +196,41 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([Lecture capteur]) --> Read[Lecture ADC A0]
-    Read --> Convert[Conversion en tension<br/>V = ADC × 4.096 / 32767]
-    Convert --> Poly[Calcul position brute<br/>Polynôme degré 4]
+    Start(["Début du cycle<br/>de contrôle"]) --> Read["Lecture ADC<br/>canal A0"]
+    Read --> Convert["Conversion en tension<br/>V = ADC x 4.096 / 32767"]
+    Convert --> Poly["Calcul position brute<br/>Polynôme degré 4"]
     
-    Poly --> Buffer[Ajout au buffer<br/>circulaire 10 valeurs]
-    Buffer --> Avg[Calcul moyenne<br/>glissante]
+    Poly --> Buffer["Ajout au buffer<br/>circulaire 10 valeurs"]
+    Buffer --> Avg["Calcul de la<br/>moyenne glissante"]
     
-    Avg --> Error[Calcul erreur<br/>ε = consigne - position]
+    Avg --> Error["Calcul erreur<br/>erreur = consigne - position"]
     
-    Error --> Check1{ε > 0.4 cm?}
-    Check1 -->|Oui| Extend[Direction: Extension<br/>IN1=LOW, IN2=HIGH]
-    Check1 -->|Non| Check2{ε < -0.4 cm?}
+    Error --> Check1{"Erreur<br/>supérieure à<br/>+0.4 cm?"}
+    Check1 -->|"Oui"| Extend["Direction: Extension<br/>IN1=LOW, IN2=HIGH"]
+    Check1 -->|"Non"| Check2{"Erreur<br/>inférieure à<br/>-0.4 cm?"}
     
-    Check2 -->|Oui| Retract[Direction: Rétraction<br/>IN1=HIGH, IN2=LOW]
-    Check2 -->|Non| Stop[Arrêt moteur<br/>IN1=LOW, IN2=LOW]
+    Check2 -->|"Oui"| Retract["Direction: Rétraction<br/>IN1=HIGH, IN2=LOW"]
+    Check2 -->|"Non"| Stop["Arrêt moteur<br/>IN1=LOW, IN2=LOW"]
     
-    Extend --> CalcPWM[Calcul PWM proportionnel]
+    Extend --> CalcPWM["Calcul PWM<br/>proportionnel"]
     Retract --> CalcPWM
-    Stop --> PWM0[PWM = 0]
+    Stop --> PWM0["PWM = 0"]
     
-    CalcPWM --> CheckBand{|ε| > 3.4 cm?}
-    CheckBand -->|Oui| MaxPWM[PWM = 255]
-    CheckBand -->|Non| PropPWM[PWM = 160 + k × |ε|<br/>k = 95/3.0]
+    CalcPWM --> CheckBand{"Erreur absolue<br/>supérieure à<br/>3.4 cm?"}
+    CheckBand -->|"Oui"| MaxPWM["PWM = 255<br/>Vitesse maximale"]
+    CheckBand -->|"Non"| PropPWM["PWM proportionnel<br/>160 + k x erreur<br/>k = 95/3.0"]
     
-    MaxPWM --> Apply[Application PWM]
+    MaxPWM --> Apply["Application<br/>du PWM"]
     PropPWM --> Apply
     PWM0 --> Apply
     
-    Apply --> Display[Affichage série<br/>200ms]
+    Apply --> Display["Affichage série<br/>toutes les 200ms"]
     Display --> Start
     
-    style Start fill:#4a90e2
-    style Avg fill:#50c878
-    style Error fill:#ffd93d
-    style Apply fill:#ff6b6b
+    style Start fill:#4a90e2,stroke:#333,stroke-width:2px
+    style Avg fill:#50c878,stroke:#333,stroke-width:2px
+    style Error fill:#ffd93d,stroke:#333,stroke-width:2px
+    style Apply fill:#ff6b6b,stroke:#333,stroke-width:2px
 ```
 
 ## Algorithme de contrôle
@@ -266,11 +266,14 @@ Si |erreur| > 3.4 cm:
 
 ```mermaid
 graph LR
-    A[Mesure brute] --> B[Buffer circulaire<br/>10 valeurs]
-    B --> C[Calcul moyenne]
-    C --> D[Position filtrée]
+    A["Mesure<br/>brute"] --> B["Buffer circulaire<br/>10 valeurs"]
+    B --> C["Calcul de la<br/>moyenne"]
+    C --> D["Position<br/>filtrée"]
     
-    style B fill:#50c878
+    style B fill:#50c878,stroke:#333,stroke-width:2px
+    style A fill:#e8f4f8,stroke:#333,stroke-width:2px
+    style C fill:#fff9e6,stroke:#333,stroke-width:2px
+    style D fill:#e8f8f0,stroke:#333,stroke-width:2px
 ```
 
 Le filtre à moyenne glissante sur 10 échantillons permet de:
